@@ -1,0 +1,256 @@
+#include "openglwidget.h"
+#include <QDebug>
+#include <fstream>
+#include <iostream>
+#include <memory>
+#include <queue>
+
+#include <QFileDialog>
+#include <QMouseEvent>
+#include <QOpenGLShaderProgram>
+#include <QOpenGLVersionFunctionsFactory>
+
+OpenGLWidget::OpenGLWidget(QWidget* parent)
+    : QOpenGLWidget(parent)
+{
+    setFocusPolicy(Qt::StrongFocus);
+    m_proj = Identity();
+    camera.translation = QVector3D(0, 0, -6.0f);
+
+    camera.RotateX(-0.8f);
+    camera.RotateY(0.8f);
+
+    m_view = camera.Matrix();
+
+    setMouseTracking(true);
+}
+
+OpenGLWidget::~OpenGLWidget()
+{
+    makeCurrent();
+}
+
+void OpenGLWidget::updateCamera()
+{
+    makeCurrent();
+    m_view = camera.Matrix();
+    m_inv_view = m_view.inverted();
+    repaint();
+}
+
+void OpenGLWidget::initializeGL()
+{
+    simulation_thread = std::make_unique<SimulationThread>(simulation_settings);
+    connect(simulation_thread.get(), &SimulationThread::positionChanged, this, &OpenGLWidget::updateState);
+
+    initializeOpenGLFunctions();
+    QOpenGLVersionProfile version;
+    version.setProfile(QSurfaceFormat::CoreProfile);
+    version.setVersion(4, 2);
+    f = reinterpret_cast<QOpenGLFunctions_4_2_Core*>(QOpenGLVersionFunctionsFactory::get(version, QOpenGLContext::currentContext()));
+
+    grid = std::unique_ptr<Object>(new Object({ { 1.0f, 0.0f, 1.0f },
+                                                  { 1.0f, 0.0f, -1.0f },
+                                                  { -1.0f, 0.0f, -1.0f },
+                                                  { -1.0f, 0.0f, 1.0f } },
+        { 0, 1, 3, 1, 2, 3 }, f));
+    grid->scale(QVector3D(300.0f, 1.0f, 300.0f), QVector3D(0, 0, 0));
+    grid->mode = DrawMode::Triangles;
+    grid->translation.setY(0.001f);
+
+    cube = std::make_unique<Cube>(f);
+    cube->rotation = base_cube_rotation;
+
+    points = std::make_unique<Points>(1000, f);
+
+    program.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/vshader.glsl");
+    program.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/fshader.glsl");
+    program.link();
+    program.bind();
+    u_view = program.uniformLocation("m_view");
+    u_proj = program.uniformLocation("m_proj");
+    u_trans = program.uniformLocation("m_trans");
+    u_inv_view = program.uniformLocation("m_inv_view");
+    u_color = program.uniformLocation("m_color");
+    u_grid = program.uniformLocation("grid");
+    u_gray = program.uniformLocation("gray");
+    program.setUniformValue(u_view, m_view);
+    program.setUniformValue(u_proj, m_proj);
+    program.setUniformValue(u_trans, Identity());
+
+    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glEnable(GL_PROGRAM_POINT_SIZE);
+    glEnable(GL_LINE_SMOOTH);
+
+    connect(this, &OpenGLWidget::frameSwapped, this, QOverload<>::of(&OpenGLWidget::update));
+}
+
+void OpenGLWidget::resizeGL(int w, int h)
+{
+    // m_proj = OrthographicProjection(-float(w) / 100.0f, float(w) / 100.0f, -float(h) / 100.0f, float(h) / 100.0f);
+    m_proj = PerspectiveProjection(float(h) / float(w), M_PI / 2.0f, 50.0f, 0.01f);
+
+    program.bind();
+    program.setUniformValue(u_proj, m_proj);
+}
+
+void OpenGLWidget::paintGL()
+{
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    glClearColor(0.19f, 0.21f, 0.23f, 1.0f);
+    // glClearColor(0.0, 0.0, 0.0, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    program.bind();
+    program.setUniformValue(u_view, m_view);
+    program.setUniformValue(u_inv_view, m_inv_view);
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    glDisable(GL_DEPTH_TEST);
+
+    program.setUniformValue(u_grid, true);
+    program.setUniformValue(u_trans, grid->Matrix());
+    grid->Render();
+    program.setUniformValue(u_grid, false);
+
+    glEnable(GL_DEPTH_TEST);
+
+    program.setUniformValue(u_trans, cube->Matrix());
+    program.setUniformValue(u_color, QVector4D(1.0f, 1.0f, 1.0f, 0.9f));
+    if (display_cube)
+        cube->Render();
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    glDisable(GL_DEPTH_TEST);
+    program.setUniformValue(u_gray, true);
+    program.setUniformValue(u_color, QVector4D(1.0f, 0.0f, 1.0f, 1.0f));
+    if (display_diagonal)
+        cube->diagonal->Render();
+    glEnable(GL_DEPTH_TEST);
+
+    program.setUniformValue(u_trans, Identity());
+    program.setUniformValue(u_color, QVector4D(1.0f, 1.0f, 1.0f, 1.0f));
+    points->Render();
+
+    program.setUniformValue(u_gray, false);
+}
+
+void OpenGLWidget::mouseMoveEvent(QMouseEvent* event)
+{
+    if (draggedRight && event->buttons().testFlag(Qt::RightButton))
+    {
+        const QPointF diff = lastMousePoint - event->pos();
+        if (diff.manhattanLength() < 10)
+        {
+            return;
+        }
+        lastMousePoint = event->pos();
+        const float s = std::max(width(), height());
+        if (event->modifiers().testFlag(Qt::ShiftModifier))
+        {
+            QVector3D tr_y = camera.inversedRotation * RotationX(M_PI / 2.0f) * QVector3D(0, 0, diff.y() / 100.0f);
+            QVector3D tr_x = camera.inversedRotation * RotationY(M_PI / 2.0f) * QVector3D(0, 0, diff.x() / 100.0f);
+            camera.center += tr_x + tr_y;
+        }
+        else
+        {
+            const float y_angle = 2 * M_PI * diff.x() / s;
+            const float x_angle = 2 * M_PI * diff.y() / s;
+            camera.RotateX(x_angle);
+            camera.RotateY(y_angle);
+        }
+        updateCamera();
+    }
+}
+
+void OpenGLWidget::mousePressEvent(QMouseEvent* event)
+{
+    if (event->button() == Qt::RightButton)
+    {
+        draggedRight = true;
+        lastMousePoint = event->pos();
+    }
+}
+
+void OpenGLWidget::mouseReleaseEvent(QMouseEvent* event)
+{
+    if (event->button() == Qt::RightButton)
+    {
+        draggedRight = false;
+        lastMousePoint = QPoint(-1, -1);
+    }
+    if (event->button() == Qt::LeftButton)
+    {
+        draggedLeft = false;
+        lastMousePoint = QPoint(-1, -1);
+    }
+}
+
+void OpenGLWidget::keyPressEvent(QKeyEvent* event)
+{
+    switch (event->key())
+    {
+
+    case Qt::Key::Key_Up:
+    {
+        camera.translation.setZ(camera.translation.z() + 0.3f);
+        updateCamera();
+        break;
+    }
+    case Qt::Key::Key_Down:
+    {
+        camera.translation.setZ(camera.translation.z() - 0.3f);
+        updateCamera();
+        break;
+    }
+    }
+}
+
+void OpenGLWidget::wheelEvent(QWheelEvent* event)
+{
+    float d = camera.translation.z();
+    d += event->pixelDelta().y() / 100.0f;
+    if (abs(d) < 0.1f)
+        d = -0.1f;
+    camera.translation.setZ(d);
+    updateCamera();
+}
+
+void OpenGLWidget::repaintSlot()
+{
+    repaint();
+}
+
+void OpenGLWidget::restartSimulation()
+{
+    simulation_thread->restart(simulation_settings);
+    cube->scaleVector = QVector3D(simulation_settings.edge_length, simulation_settings.edge_length, simulation_settings.edge_length);
+    points->ResetPoints();
+}
+
+void OpenGLWidget::updateSetting()
+{
+    simulation_thread->updateSettings(simulation_settings);
+    cube->scaleVector = QVector3D(simulation_settings.edge_length, simulation_settings.edge_length, simulation_settings.edge_length);
+}
+
+void OpenGLWidget::updateState(QQuaternion p)
+{
+    cube->rotation = p * base_cube_rotation;
+    points->AddPoint(cube->Matrix() * QVector3D(1.0f, 1.0f, 1.0f));
+}
+
+void OpenGLWidget::resetPoints(const int max_points)
+{
+    makeCurrent();
+    points.reset(new Points(max_points, f));
+}

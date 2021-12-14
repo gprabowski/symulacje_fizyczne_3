@@ -1,0 +1,8 @@
+BasedOnStyle: WebKit
+AllowShortLoopsOnASingleLine: false
+BreakBeforeBraces: Allman
+BreakConstructorInitializersBeforeComma: false
+AllowShortIfStatementsOnASingleLine: false
+AllowShortBlocksOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+IncludeBlocks: Preserve
