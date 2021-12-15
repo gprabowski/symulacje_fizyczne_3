@@ -242,8 +242,6 @@ void OpenGLWidget::updateSetting()
     throw std::logic_error("not implemented");
 }
 
-// to wygląda źle ale przez Return Value Optimization jeśli dobrze
-// zrobione to nie będzie takie złe myślę
 void OpenGLWidget::updateState(point_positions_t pos)
 {
     throw std::logic_error("not implemented");

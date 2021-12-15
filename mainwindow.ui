@@ -102,17 +102,17 @@ Cube Connections</string>
           <string>Cube</string>
          </property>
          <layout class="QFormLayout" name="formLayout">
-          <item row="1" column="0">
+          <item row="2" column="0">
            <widget class="QLabel" name="massLabel">
             <property name="text">
              <string>Mass</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="2" column="1">
            <widget class="QDoubleSpinBox" name="massSpinBox"/>
           </item>
-          <item row="5" column="0">
+          <item row="6" column="0">
            <widget class="QLabel" name="randomLabel">
             <property name="text">
              <string>Max initial
@@ -120,7 +120,7 @@ Cube Connections</string>
             </property>
            </widget>
           </item>
-          <item row="7" column="1">
+          <item row="8" column="1">
            <widget class="QCheckBox" name="randomCheckBox">
             <property name="layoutDirection">
              <enum>Qt::LeftToRight</enum>
@@ -133,48 +133,58 @@ Cube Connections</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
+          <item row="3" column="0">
            <widget class="QLabel" name="kLabel">
             <property name="text">
              <string>k</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
+          <item row="3" column="1">
            <widget class="QDoubleSpinBox" name="kSpinBox"/>
           </item>
-          <item row="3" column="1">
+          <item row="4" column="1">
            <widget class="QDoubleSpinBox" name="c1SpinBox"/>
           </item>
-          <item row="4" column="1">
+          <item row="5" column="1">
            <widget class="QDoubleSpinBox" name="c2SpinBox"/>
           </item>
-          <item row="3" column="0">
+          <item row="4" column="0">
            <widget class="QLabel" name="c1Label">
             <property name="text">
              <string>c1</string>
             </property>
            </widget>
           </item>
-          <item row="4" column="0">
+          <item row="5" column="0">
            <widget class="QLabel" name="c2Label">
             <property name="text">
              <string>c2</string>
             </property>
            </widget>
           </item>
-          <item row="5" column="1">
+          <item row="6" column="1">
            <widget class="QDoubleSpinBox" name="randomSpinBox"/>
           </item>
-          <item row="6" column="0">
+          <item row="7" column="0">
            <widget class="QLabel" name="dtLabel">
             <property name="text">
              <string>dt</string>
             </property>
            </widget>
           </item>
-          <item row="6" column="1">
+          <item row="7" column="1">
            <widget class="QSpinBox" name="dtSpinBox"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="l0Label">
+            <property name="text">
+             <string>l0</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="l0SpinBox"/>
           </item>
          </layout>
         </widget>

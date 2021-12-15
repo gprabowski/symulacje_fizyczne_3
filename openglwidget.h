@@ -63,8 +63,6 @@ public slots:
     void repaintSlot();
     void restartSimulation();
     void updateSetting();
-    // to wygląda źle ale przez Return Value Optimization jeśli dobrze
-    // zrobione to nie będzie takie złe myślę
     void updateState(point_positions_t pos);
     void resetPoints(const int max_points);
 };

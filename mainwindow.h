@@ -58,6 +58,9 @@ public:
         QObject::connect(ui->randomSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](const double v)
             { w->simulation_settings.random_max = v; });
 
+        QObject::connect(ui->l0SpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](const double v)
+            { w->simulation_settings.l0 = v; });
+
         QObject::connect(ui->dtSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), [&](const int v)
             { w->simulation_settings.dt_ms = v; });
 

@@ -6,8 +6,18 @@
 #include <QTimer>
 #include <array>
 
-using point_positions_t = std::array<std::array<std::array<QVector3D, 4>, 4>, 4>;
-using frame_position_t = std::array<std::array<std::array<QVector3D, 2>, 2>, 2>;
+template <int N, typename T>
+using triple_array = std::array<std::array<std::array<T, N>, N>, N>;
+
+using point_positions_t = triple_array<4, QVector3D>;
+using frame_position_t = triple_array<2, QVector2D>;
+using velocities_t = triple_array<4, float>;
+
+struct euler_out_t
+{
+    QVector3D vel_t;
+    QVector3D pos_t;
+};
 
 struct SimulationSettings
 {
@@ -37,6 +47,9 @@ struct SimulationSettings
 
     // 12. dt in ms
     int dt_ms;
+
+    // 13. l0
+    float l0;
 };
 
 class SimulationThread : public QThread
@@ -67,10 +80,17 @@ signals:
 
 private:
     void precalculate();
+    void initialize_data();
 
     QTimer s_timer;
     SimulationSettings settings;
     point_positions_t current_positions;
+    velocities_t current_velocities;
+    float dt;
+    float pre1_c1;
+    float pre1_c2;
+    float pre2;
+    float mul;
     frame_position_t frame;
 
 protected:
