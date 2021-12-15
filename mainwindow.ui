@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>974</width>
-    <height>562</height>
+    <width>1070</width>
+    <height>652</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,104 +34,147 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QGroupBox" name="groupBox_2">
+        <widget class="QGroupBox" name="groupBox_3">
          <property name="title">
-          <string>Cube</string>
+          <string>View</string>
          </property>
-         <layout class="QFormLayout" name="formLayout">
+         <layout class="QFormLayout" name="formLayout_2">
           <item row="0" column="0">
-           <widget class="QLabel" name="label">
+           <widget class="QCheckBox" name="controlPointsCheckBox">
             <property name="text">
-             <string>Edge</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QDoubleSpinBox" name="edgeSpinBox">
-            <property name="minimum">
-             <double>0.010000000000000</double>
-            </property>
-            <property name="value">
-             <double>1.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>Density</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QDoubleSpinBox" name="densitySpinBox">
-            <property name="minimum">
-             <double>0.010000000000000</double>
-            </property>
-            <property name="value">
-             <double>1.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>Deviation</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QDoubleSpinBox" name="deviationSpinBox">
-            <property name="maximum">
-             <double>90.989999999999995</double>
-            </property>
-            <property name="value">
-             <double>30.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Angular velocity</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QDoubleSpinBox" name="angularVelocitySpinBox"/>
-          </item>
-          <item row="5" column="1">
-           <widget class="QCheckBox" name="gravityCheckBox">
-            <property name="layoutDirection">
-             <enum>Qt::LeftToRight</enum>
-            </property>
-            <property name="text">
-             <string>Gravity</string>
+             <string>Control Points</string>
             </property>
             <property name="checked">
              <bool>true</bool>
             </property>
            </widget>
           </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="label_6">
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="frameCheckBox">
             <property name="text">
-             <string>dt [ms]</string>
+             <string>Control Frame and 
+Cube Connections</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
-          <item row="4" column="1">
-           <widget class="QSpinBox" name="dtSpinBox">
-            <property name="minimum">
-             <number>1</number>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="constraintCheckBox">
+            <property name="text">
+             <string>Constraint</string>
             </property>
-            <property name="maximum">
-             <number>1000</number>
-            </property>
-            <property name="value">
-             <number>10</number>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="jellyCheckBox">
+            <property name="text">
+             <string>Jelly</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+            <property name="tristate">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QCheckBox" name="innerCheckBox">
+            <property name="text">
+             <string>Inner model</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="title">
+          <string>Cube</string>
+         </property>
+         <layout class="QFormLayout" name="formLayout">
+          <item row="1" column="0">
+           <widget class="QLabel" name="massLabel">
+            <property name="text">
+             <string>Mass</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="massSpinBox"/>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="randomLabel">
+            <property name="text">
+             <string>Max initial
+ randomness</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="1">
+           <widget class="QCheckBox" name="randomCheckBox">
+            <property name="layoutDirection">
+             <enum>Qt::LeftToRight</enum>
+            </property>
+            <property name="text">
+             <string>Random</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="kLabel">
+            <property name="text">
+             <string>k</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QDoubleSpinBox" name="kSpinBox"/>
+          </item>
+          <item row="3" column="1">
+           <widget class="QDoubleSpinBox" name="c1SpinBox"/>
+          </item>
+          <item row="4" column="1">
+           <widget class="QDoubleSpinBox" name="c2SpinBox"/>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="c1Label">
+            <property name="text">
+             <string>c1</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="c2Label">
+            <property name="text">
+             <string>c2</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QDoubleSpinBox" name="randomSpinBox"/>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="dtLabel">
+            <property name="text">
+             <string>dt</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QSpinBox" name="dtSpinBox"/>
           </item>
          </layout>
         </widget>
@@ -148,62 +191,6 @@
          <property name="text">
           <string>Reset and apply</string>
          </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="groupBox_3">
-         <property name="title">
-          <string>View</string>
-         </property>
-         <layout class="QFormLayout" name="formLayout_2">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_5">
-            <property name="text">
-             <string>Patch points</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QSpinBox" name="pointsSpinBox">
-            <property name="minimum">
-             <number>1000</number>
-            </property>
-            <property name="maximum">
-             <number>100000</number>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QCheckBox" name="cubeCheckBox">
-            <property name="text">
-             <string>Cube</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QCheckBox" name="diagonalCheckBox">
-            <property name="text">
-             <string>Diagonal</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QCheckBox" name="pathCheckBox">
-            <property name="text">
-             <string>Path</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
         </widget>
        </item>
        <item>
@@ -239,8 +226,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>974</width>
-     <height>20</height>
+     <width>1070</width>
+     <height>22</height>
     </rect>
    </property>
   </widget>

@@ -157,8 +157,8 @@ void OpenGLWidget::mouseMoveEvent(QMouseEvent* event)
         const float s = std::max(width(), height());
         if (event->modifiers().testFlag(Qt::ShiftModifier))
         {
-            QVector3D tr_y = camera.inversedRotation * RotationX(M_PI / 2.0f) * QVector3D(0, 0, diff.y() / 100.0f);
-            QVector3D tr_x = camera.inversedRotation * RotationY(M_PI / 2.0f) * QVector3D(0, 0, diff.x() / 100.0f);
+            QVector3D tr_y = camera.inversedRotation.map(RotationX(M_PI / 2.0f).map(QVector3D(0, 0, diff.y() / 100.0f)));
+            QVector3D tr_x = camera.inversedRotation.map(RotationY(M_PI / 2.0f).map(QVector3D(0, 0, diff.x() / 100.0f)));
             camera.center += tr_x + tr_y;
         }
         else
@@ -233,24 +233,30 @@ void OpenGLWidget::repaintSlot()
 void OpenGLWidget::restartSimulation()
 {
     simulation_thread->restart(simulation_settings);
-    cube->scaleVector = QVector3D(simulation_settings.edge_length, simulation_settings.edge_length, simulation_settings.edge_length);
-    points->ResetPoints();
+    throw std::logic_error("not implemented");
 }
 
 void OpenGLWidget::updateSetting()
 {
     simulation_thread->updateSettings(simulation_settings);
-    cube->scaleVector = QVector3D(simulation_settings.edge_length, simulation_settings.edge_length, simulation_settings.edge_length);
+    throw std::logic_error("not implemented");
 }
 
-void OpenGLWidget::updateState(QQuaternion p)
+// to wygląda źle ale przez Return Value Optimization jeśli dobrze
+// zrobione to nie będzie takie złe myślę
+void OpenGLWidget::updateState(point_positions_t pos)
 {
-    cube->rotation = p * base_cube_rotation;
-    points->AddPoint(cube->Matrix() * QVector3D(1.0f, 1.0f, 1.0f));
+    throw std::logic_error("not implemented");
 }
 
 void OpenGLWidget::resetPoints(const int max_points)
 {
     makeCurrent();
     points.reset(new Points(max_points, f));
+}
+
+void OpenGLWidget::frame_position_changed(const frame_position_t& frame)
+{
+    simulation_thread->frame_changed(frame);
+    throw std::logic_error("not implemented");
 }

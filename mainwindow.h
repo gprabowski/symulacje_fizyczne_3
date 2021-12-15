@@ -25,31 +25,48 @@ public:
 
         auto& w = ui->openGLWidget;
 
-        QObject::connect(ui->edgeSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](const double v)
-            { w->simulation_settings.edge_length = v; });
+        QObject::connect(ui->controlPointsCheckBox, QOverload<bool>::of(&QCheckBox::clicked), [&](const bool v)
+            { w->simulation_settings.show_control_points = v; });
 
-        QObject::connect(ui->densitySpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](const double v)
-            { w->simulation_settings.density = v; });
-        QObject::connect(ui->deviationSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](const double v)
-            { w->simulation_settings.deviation = v; });
-        QObject::connect(ui->angularVelocitySpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](const double v)
-            { w->simulation_settings.angular_velocity = v; });
+        QObject::connect(ui->frameCheckBox, QOverload<bool>::of(&QCheckBox::clicked), [&](const bool v)
+            { w->simulation_settings.show_control_frame = v; });
+
+        QObject::connect(ui->constraintCheckBox, QOverload<bool>::of(&QCheckBox::clicked), [&](const bool v)
+            { w->simulation_settings.show_constraint = v; });
+
+        QObject::connect(ui->jellyCheckBox, QOverload<bool>::of(&QCheckBox::clicked), [&](const bool v)
+            { w->simulation_settings.show_jelly = v; });
+
+        QObject::connect(ui->innerCheckBox, QOverload<bool>::of(&QCheckBox::clicked), [&](const bool v)
+            { w->simulation_settings.show_inner = v; });
+
+        QObject::connect(ui->randomCheckBox, QOverload<bool>::of(&QCheckBox::clicked), [&](const bool v)
+            { w->simulation_settings.use_randomization = v; });
+
+        QObject::connect(ui->massSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](const double v)
+            { w->simulation_settings.mass = v; });
+
+        QObject::connect(ui->kSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](const double v)
+            { w->simulation_settings.k = v; });
+
+        QObject::connect(ui->c1SpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](const double v)
+            { w->simulation_settings.c1 = v; });
+
+        QObject::connect(ui->c2SpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](const double v)
+            { w->simulation_settings.c2 = v; });
+
+        QObject::connect(ui->randomSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](const double v)
+            { w->simulation_settings.random_max = v; });
+
         QObject::connect(ui->dtSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), [&](const int v)
             { w->simulation_settings.dt_ms = v; });
-        QObject::connect(ui->gravityCheckBox, QOverload<bool>::of(&QCheckBox::clicked), [&](const bool v)
-            { w->simulation_settings.gravity = v; });
-        QObject::connect(ui->applyButton, QOverload<bool>::of(&QPushButton::clicked), [&](const bool v)
-            { w->updateSetting(); });
-        QObject::connect(ui->resetAndApplyButton, QOverload<bool>::of(&QPushButton::clicked), [&](const bool v)
-            { w->restartSimulation(); });
 
-        QObject::connect(ui->cubeCheckBox, QOverload<bool>::of(&QCheckBox::clicked), [&](const bool v)
-            { w->display_cube = v; });
-        QObject::connect(ui->diagonalCheckBox, QOverload<bool>::of(&QCheckBox::clicked), [&](const bool v)
-            { w->display_diagonal = v; });
-        QObject::connect(ui->pathCheckBox, QOverload<bool>::of(&QCheckBox::clicked), [&](const bool v)
-            { w->display_path = v; });
-        QObject::connect(ui->pointsSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), w, &OpenGLWidget::resetPoints);
+        // reset and apply buttons
+        QObject::connect(ui->applyButton, QOverload<bool>::of(&QPushButton::clicked), [&](const bool)
+            { w->updateSetting(); });
+
+        QObject::connect(ui->resetAndApplyButton, QOverload<bool>::of(&QPushButton::clicked), [&](const bool)
+            { w->restartSimulation(); });
     }
 
     ~MainWindow()

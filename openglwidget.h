@@ -23,10 +23,10 @@ public:
     bool display_cube = true;
     bool display_diagonal = true;
     bool display_path = true;
-    SimulationSettings simulation_settings { 1.0f, 1.0f, 30, 0.0f, 10.0f, true };
+    SimulationSettings simulation_settings {};
+    std::unique_ptr<SimulationThread> simulation_thread;
 
 private:
-    std::unique_ptr<SimulationThread> simulation_thread;
     std::unique_ptr<Cube> cube;
     std::unique_ptr<Points> points;
     const QQuaternion base_cube_rotation = QQuaternion::rotationTo(QVector3D(1.0f, 1.0f, 1.0f), QVector3D(0, 1.0f, 0));
@@ -57,11 +57,14 @@ private:
 
     void setCamera();
     void updateCamera();
+    void frame_position_changed(const frame_position_t& frame);
 
 public slots:
     void repaintSlot();
     void restartSimulation();
     void updateSetting();
-    void updateState(QQuaternion p);
+    // to wygląda źle ale przez Return Value Optimization jeśli dobrze
+    // zrobione to nie będzie takie złe myślę
+    void updateState(point_positions_t pos);
     void resetPoints(const int max_points);
 };
