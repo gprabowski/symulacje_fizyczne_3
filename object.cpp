@@ -215,7 +215,7 @@ BezierCube::BezierCube(const std::array<std::array<std::array<QVector3D, 4>, 4>,
             indices.push_back(toIdx(0, i, j));
         }
     }
-    for (int i = 0; i < 4; i++)
+    for (int i = 3; i >= 0; i--)
     {
         for (int j = 0; j < 4; j++)
         {
@@ -230,7 +230,7 @@ BezierCube::BezierCube(const std::array<std::array<std::array<QVector3D, 4>, 4>,
             indices.push_back(toIdx(i, 0, j));
         }
     }
-    for (int i = 0; i < 4; i++)
+    for (int i = 3; i >= 0; i--)
     {
         for (int j = 0; j < 4; j++)
         {
@@ -245,7 +245,7 @@ BezierCube::BezierCube(const std::array<std::array<std::array<QVector3D, 4>, 4>,
             indices.push_back(toIdx(i, j, 0));
         }
     }
-    for (int i = 0; i < 4; i++)
+    for (int i = 3; i >= 0; i--)
     {
         for (int j = 0; j < 4; j++)
         {
