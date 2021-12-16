@@ -33,13 +33,6 @@ struct IndicesBuffer : public std::vector<unsigned int>
         emplace_back(t.indices[1]);
         emplace_back(t.indices[2]);
     }
-    void push_back(std::initializer_list<unsigned int> indices)
-    {
-        for (const auto& p : indices)
-        {
-            emplace_back(p);
-        }
-    }
 
     IndicesBuffer(std::initializer_list<unsigned int> init)
         : std::vector<unsigned int>(init)
@@ -111,6 +104,15 @@ public:
     void RotateY(float angle);
     QMatrix4x4 Matrix() const;
     QMatrix4x4 Rotation() const;
+};
+
+class BezierCube : public Object
+{
+public:
+    virtual void Render() override;
+    void updatePoints(const std::array<std::array<std::array<QVector3D, 4>, 4>, 4>& p);
+
+    BezierCube(const std::array<std::array<std::array<QVector3D, 4>, 4>, 4>& p, QOpenGLFunctions_4_2_Core* f);
 };
 
 class Cube : public Object

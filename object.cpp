@@ -173,3 +173,86 @@ void Points::ResetPoints()
     current = 0;
     last = 0;
 }
+
+void BezierCube::Render()
+{
+    f->glBindVertexArray(VAO);
+    f->glPatchParameteri(GL_PATCH_VERTICES, 16);
+    f->glDrawElements(GL_PATCHES, indices.size(), GL_UNSIGNED_INT, 0);
+    f->glBindVertexArray(0);
+}
+
+void BezierCube::updatePoints(const std::array<std::array<std::array<QVector3D, 4>, 4>, 4>& p)
+{
+    const auto toIdx = [&](const int i, const int j, const int k) -> unsigned int
+    { return i * 16 + j * 4 + k; };
+
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            for (int k = 0; k < 4; k++)
+            {
+                vertices[toIdx(i, j, k)] = p[i][j][k];
+            }
+        }
+    }
+    ModifyOpenglData();
+}
+
+BezierCube::BezierCube(const std::array<std::array<std::array<QVector3D, 4>, 4>, 4>& p, QOpenGLFunctions_4_2_Core* f)
+    : Object(f)
+{
+
+    indices.reserve(16 * 6);
+    const auto toIdx = [&](const int i, const int j, const int k) -> unsigned int
+    { return i * 16 + j * 4 + k; };
+
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            indices.push_back(toIdx(0, i, j));
+        }
+    }
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            indices.push_back(toIdx(3, i, j));
+        }
+    }
+
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            indices.push_back(toIdx(i, 0, j));
+        }
+    }
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            indices.push_back(toIdx(i, 3, j));
+        }
+    }
+
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            indices.push_back(toIdx(i, j, 0));
+        }
+    }
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            indices.push_back(toIdx(i, j, 3));
+        }
+    }
+
+    vertices.resize(64);
+    updatePoints(p);
+}

@@ -29,6 +29,7 @@ public:
 private:
     std::unique_ptr<Cube> cube;
     std::unique_ptr<Points> points;
+    std::unique_ptr<BezierCube> bezierCube;
     const QQuaternion base_cube_rotation = QQuaternion::rotationTo(QVector3D(1.0f, 1.0f, 1.0f), QVector3D(0, 1.0f, 0));
 
     QOpenGLFunctions_4_2_Core* f;
@@ -40,7 +41,8 @@ private:
 
     std::unique_ptr<Object> grid;
 
-    QOpenGLShaderProgram program;
+    QOpenGLShaderProgram program, surfacec0_program;
+    GLuint surfacec0_u_view, surfacec0_u_proj, surfacec0_u_segments_in, surfacec0_u_segments_out, surfacec0_u_inv_view;
 
     void initializeGL() override;
     void resizeGL(int w, int h) override;

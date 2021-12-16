@@ -63,6 +63,21 @@ void OpenGLWidget::initializeGL()
 
     points = std::make_unique<Points>(1000, f);
 
+    point_positions_t pnts;
+
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            for (int k = 0; k < 4; k++)
+            {
+                pnts[i][j][k] = QVector3D(i, j, k) + QVector3D(float(rand() % 51) / 100.0f - 0.25f, float(rand() % 51) / 100.0f - 0.25f, float(rand() % 51) / 100.0f - 0.25f);
+            }
+        }
+    }
+
+    bezierCube = std::make_unique<BezierCube>(pnts, f);
+
     program.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/vshader.glsl");
     program.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/fshader.glsl");
     program.link();
@@ -77,6 +92,24 @@ void OpenGLWidget::initializeGL()
     program.setUniformValue(u_view, m_view);
     program.setUniformValue(u_proj, m_proj);
     program.setUniformValue(u_trans, Identity());
+
+    surfacec0_program.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/surface_v.glsl");
+    surfacec0_program.addShaderFromSourceFile(QOpenGLShader::TessellationControl, ":/surface_tcs.glsl");
+    surfacec0_program.addShaderFromSourceFile(QOpenGLShader::TessellationEvaluation, ":/surfacec0_tes.glsl");
+    surfacec0_program.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/surface_f.glsl");
+    surfacec0_program.link();
+    surfacec0_program.bind();
+
+    surfacec0_u_view = surfacec0_program.uniformLocation("m_view");
+    surfacec0_u_proj = surfacec0_program.uniformLocation("m_proj");
+    surfacec0_u_segments_in = surfacec0_program.uniformLocation("segments_in");
+    surfacec0_u_segments_out = surfacec0_program.uniformLocation("segments_out");
+    surfacec0_u_inv_view = surfacec0_program.uniformLocation("m_inv_view");
+    surfacec0_program.setUniformValue(surfacec0_u_view, m_view);
+    surfacec0_program.setUniformValue(surfacec0_u_inv_view, m_inv_view);
+    surfacec0_program.setUniformValue(surfacec0_u_proj, m_proj);
+    surfacec0_program.setUniformValue(surfacec0_u_segments_in, 20);
+    surfacec0_program.setUniformValue(surfacec0_u_segments_out, 20);
 
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
@@ -123,6 +156,13 @@ void OpenGLWidget::paintGL()
 
     glEnable(GL_DEPTH_TEST);
 
+    surfacec0_program.bind();
+    surfacec0_program.setUniformValue(surfacec0_u_view, m_view);
+    surfacec0_program.setUniformValue(surfacec0_u_inv_view, m_inv_view);
+    surfacec0_program.setUniformValue(surfacec0_u_proj, m_proj);
+    bezierCube->Render();
+
+    /*
     program.setUniformValue(u_trans, cube->Matrix());
     program.setUniformValue(u_color, QVector4D(1.0f, 1.0f, 1.0f, 0.9f));
     if (display_cube)
@@ -140,8 +180,8 @@ void OpenGLWidget::paintGL()
     program.setUniformValue(u_trans, Identity());
     program.setUniformValue(u_color, QVector4D(1.0f, 1.0f, 1.0f, 1.0f));
     points->Render();
-
     program.setUniformValue(u_gray, false);
+    */
 }
 
 void OpenGLWidget::mouseMoveEvent(QMouseEvent* event)
@@ -244,7 +284,7 @@ void OpenGLWidget::updateSetting()
 
 void OpenGLWidget::updateState(point_positions_t pos)
 {
-    throw std::logic_error("not implemented");
+    bezierCube->updatePoints(pos);
 }
 
 void OpenGLWidget::resetPoints(const int max_points)

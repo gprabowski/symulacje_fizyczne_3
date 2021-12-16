@@ -2,5 +2,9 @@
     <qresource prefix="/">
         <file>vshader.glsl</file>
         <file>fshader.glsl</file>
+        <file>surface_v.glsl</file>
+        <file>surface_tcs.glsl</file>
+        <file>surfacec0_tes.glsl</file>
+        <file>surface_f.glsl</file>        
     </qresource>
 </RCC>
