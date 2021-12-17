@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QtMath>
 #include <cmath>
+#include <iostream>
 #include <type_traits>
 
 using perm = std::array<int, 3>;
@@ -37,9 +38,11 @@ void SimulationThread::initialize_data()
                 // odejmuje 1.5 żeby pozycje startowe były takie żeby nasz żelek
                 // miał swoje centrum w (0, 0, 0)
                 current_positions[i][j][k] = QVector3D((i - 1.5f) * settings.l0, (j - 1.5f) * settings.l0, (k - 1.5f) * settings.l0);
+                std::cout << settings.l0 << std::endl;
+                std::cout << current_positions[i][j][k].x() << std::endl;
                 current_velocities[i][j][k] = 0.0f;
                 // implement random initialization
-                throw std::logic_error("not implemented random initialization");
+                // throw std::logic_error("not implemented random initialization");
             }
         }
     }
@@ -83,18 +86,17 @@ void SimulationThread::update() noexcept
                 // in the xy plane without xz and yz elements (4 springs)
                 for (const auto p : permutations)
                 {
-                    try
+                    auto idx1 = i + p[1];
+                    auto idx2 = j + p[2];
+                    auto idx3 = k + p[3];
+                    if (idx1 >= 0 && idx1 < 4 && idx2 >= 0 && idx2 < 4 && idx3 >= 0 && idx3 < 4)
                     {
-                        const auto& pos2 = current_positions.at(i + p[0]).at(j + p[1]).at(k + p[2]);
+                        const auto& pos2 = current_positions[idx1][idx2][idx3];
                         const auto dist = (curr_pos - pos2).length();
                         pos_t += curr_vel * dt * (pos2 - curr_pos).normalized();
                         // velocity += (elasticity * (l0 - position) - stickiness * velocity + h) * 1/weight * dt;
-                        const auto acceleration = settings.c1 * (settings.l0 - dist) - settings.k * curr_vel;
+                        const auto acceleration = (settings.c1 * (settings.l0 - dist) - settings.k * curr_vel) * 1 / settings.mass * dt;
                         vel_t += acceleration;
-                    }
-                    catch (std::out_of_range& e)
-                    {
-                        continue;
                     }
                 }
 
@@ -110,7 +112,6 @@ void SimulationThread::update() noexcept
     // chyba nie unikniemy kopii
     emit positionChanged(ret);
     current_positions = std::move(ret);
-    throw std::logic_error("not implemented");
 }
 
 void SimulationThread::updateSettings(const SimulationSettings& s)
@@ -125,10 +126,10 @@ void SimulationThread::restart(const SimulationSettings& s)
     exit();
     wait();
     settings = s;
-    dt = s.dt_ms / 1000;
+    dt = s.dt_ms / 1000.f;
     precalculate();
     initialize_data();
-    throw std::logic_error("not implemented");
+    // throw std::logic_error("not implemented");
     start();
 }
 

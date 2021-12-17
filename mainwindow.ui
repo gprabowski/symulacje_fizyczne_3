@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1070</width>
-    <height>652</height>
+    <height>685</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -110,7 +110,11 @@ Cube Connections</string>
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QDoubleSpinBox" name="massSpinBox"/>
+           <widget class="QDoubleSpinBox" name="massSpinBox">
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
           </item>
           <item row="6" column="0">
            <widget class="QLabel" name="randomLabel">
@@ -141,13 +145,25 @@ Cube Connections</string>
            </widget>
           </item>
           <item row="3" column="1">
-           <widget class="QDoubleSpinBox" name="kSpinBox"/>
+           <widget class="QDoubleSpinBox" name="kSpinBox">
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
           </item>
           <item row="4" column="1">
-           <widget class="QDoubleSpinBox" name="c1SpinBox"/>
+           <widget class="QDoubleSpinBox" name="c1SpinBox">
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
           </item>
           <item row="5" column="1">
-           <widget class="QDoubleSpinBox" name="c2SpinBox"/>
+           <widget class="QDoubleSpinBox" name="c2SpinBox">
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
           </item>
           <item row="4" column="0">
            <widget class="QLabel" name="c1Label">
@@ -164,7 +180,11 @@ Cube Connections</string>
            </widget>
           </item>
           <item row="6" column="1">
-           <widget class="QDoubleSpinBox" name="randomSpinBox"/>
+           <widget class="QDoubleSpinBox" name="randomSpinBox">
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
           </item>
           <item row="7" column="0">
            <widget class="QLabel" name="dtLabel">
@@ -174,7 +194,11 @@ Cube Connections</string>
            </widget>
           </item>
           <item row="7" column="1">
-           <widget class="QSpinBox" name="dtSpinBox"/>
+           <widget class="QSpinBox" name="dtSpinBox">
+            <property name="value">
+             <number>5</number>
+            </property>
+           </widget>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="l0Label">
@@ -184,7 +208,11 @@ Cube Connections</string>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QDoubleSpinBox" name="l0SpinBox"/>
+           <widget class="QDoubleSpinBox" name="l0SpinBox">
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>

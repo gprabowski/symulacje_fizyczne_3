@@ -23,33 +23,33 @@ struct SimulationSettings
 {
     // interface musi dawać możliwość dodania:
     //  1. wyświetlanie punktów kontrolnych
-    bool show_control_points;
+    bool show_control_points { true };
     //  2. wyświetlanie ramki sterującej i połączeń z kostką
-    bool show_control_frame;
+    bool show_control_frame { true };
     //  3. prostopadłościanu ograniczającego
-    bool show_constraint;
+    bool show_constraint { true };
     //  4. cieniowanej kostki beziera
-    bool show_jelly;
+    bool show_jelly { true };
     //  5. cieniowanej zdeformowanej bryły
-    bool show_inner;
+    bool show_inner { true };
     //  6. zaburzenie
-    bool use_randomization;
+    bool use_randomization { true };
     //  7. zmiana masy punktów kontrolnych
-    float mass;
+    float mass { 1.0f };
     //  8. wartość tłumienia k
-    float k;
+    float k { 1.0f };
     //  9. współczynnik sprężystości c1 (połączeń między masami)
-    float c1;
+    float c1 { 1.0f };
     //  10. c2 (kostka a ramka sterująca)
-    float c2;
+    float c2 { 1.0f };
     //  11. początkowe zaburzenie, określające maksymalną wartość losowanych prędkości lub odchyleń
-    float random_max;
+    float random_max { 1.0f };
 
     // 12. dt in ms
-    int dt_ms;
+    int dt_ms { 20 };
 
     // 13. l0
-    float l0;
+    float l0 { 1.0f };
 };
 
 class SimulationThread : public QThread

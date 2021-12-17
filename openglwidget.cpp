@@ -273,7 +273,7 @@ void OpenGLWidget::repaintSlot()
 void OpenGLWidget::restartSimulation()
 {
     simulation_thread->restart(simulation_settings);
-    throw std::logic_error("not implemented");
+    // throw std::logic_error("not implemented");
 }
 
 void OpenGLWidget::updateSetting()
