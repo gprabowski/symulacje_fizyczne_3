@@ -29,6 +29,7 @@ constexpr std::array<perm, 18> permutations {
 
 void SimulationThread::initialize_data()
 {
+    std::uniform_real_distribution<float> distribution(-settings.random_max, settings.random_max);
     for (int i = 0; i < 4; ++i)
     {
         for (int j = 0; j < 4; ++j)
@@ -38,11 +39,19 @@ void SimulationThread::initialize_data()
                 // odejmuje 1.5 żeby pozycje startowe były takie żeby nasz żelek
                 // miał swoje centrum w (0, 0, 0)
                 current_positions[i][j][k] = QVector3D((i - 1.5f) * settings.l0, (j - 1.5f) * settings.l0, (k - 1.5f) * settings.l0);
-                std::cout << settings.l0 << std::endl;
-                std::cout << current_positions[i][j][k].x() << std::endl;
-                current_velocities[i][j][k] = 0.0f;
+                for (int l = 0; l < 18; ++l)
+                {
+                    current_velocities[i][j][k][l] = 0.0f;
+                }
                 // implement random initialization
-                // throw std::logic_error("not implemented random initialization");
+                if (settings.use_randomization)
+                {
+                    current_positions[i][j][k] += QVector3D(distribution(generator), distribution(generator), distribution(generator));
+                    for (int l = 0; l < 18; ++l)
+                    {
+                        current_velocities[i][j][k][l] += distribution(generator);
+                    }
+                }
             }
         }
     }
@@ -75,28 +84,29 @@ void SimulationThread::update() noexcept
             for (int k = 0; k < 4; ++k)
             {
                 QVector3D pos_t;
-                float vel_t { 0.0f };
+                QVector3D vel_t;
                 const auto& curr_pos = current_positions[i][j][k];
-                const auto& curr_vel = current_velocities[i][j][k];
                 // accumulation for pos[i, j, k]
 
                 // pre computed constant terms
                 // in the xz plane (8 springs)
                 // in the yz plane without xz elements (6 springs)
                 // in the xy plane without xz and yz elements (4 springs)
+                int p_idx = 0;
                 for (const auto p : permutations)
                 {
-                    auto idx1 = i + p[1];
-                    auto idx2 = j + p[2];
-                    auto idx3 = k + p[3];
+                    auto& curr_vel = current_velocities[i][j][k][p_idx++];
+                    auto idx1 = i + p[0];
+                    auto idx2 = j + p[1];
+                    auto idx3 = k + p[2];
                     if (idx1 >= 0 && idx1 < 4 && idx2 >= 0 && idx2 < 4 && idx3 >= 0 && idx3 < 4)
                     {
                         const auto& pos2 = current_positions[idx1][idx2][idx3];
                         const auto dist = (curr_pos - pos2).length();
                         pos_t += curr_vel * dt * (pos2 - curr_pos).normalized();
                         // velocity += (elasticity * (l0 - position) - stickiness * velocity + h) * 1/weight * dt;
-                        const auto acceleration = (settings.c1 * (settings.l0 - dist) - settings.k * curr_vel) * 1 / settings.mass * dt;
-                        vel_t += acceleration;
+                        const auto acceleration = (-settings.c1 * (settings.l0 - dist) - settings.k * curr_vel) * 1 / settings.mass * dt;
+                        curr_vel += acceleration;
                     }
                 }
 
@@ -105,7 +115,6 @@ void SimulationThread::update() noexcept
                 // (każde połączenie wchodzi w 2 interakcje, nie możemy przesunąć jednej strony
                 // i potem policzyć drugiej na nowych danych)
                 ret[i][j][k] = curr_pos + pos_t;
-                current_velocities[i][j][k] += vel_t;
             }
         }
     }

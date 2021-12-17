@@ -1,17 +1,19 @@
 #ifndef SPRINGTHREAD_H
 #define SPRINGTHREAD_H
 
-#include <QQuaternion>
 #include <QThread>
 #include <QTimer>
+#include <QVector3D>
 #include <array>
+#include <random>
 
 template <int N, typename T>
 using triple_array = std::array<std::array<std::array<T, N>, N>, N>;
 
 using point_positions_t = triple_array<4, QVector3D>;
 using frame_position_t = triple_array<2, QVector2D>;
-using velocities_t = triple_array<4, float>;
+using single_vel_t = std::array<float, 18>;
+using velocities_t = triple_array<4, single_vel_t>;
 
 struct euler_out_t
 {
@@ -92,6 +94,8 @@ private:
     float pre2;
     float mul;
     frame_position_t frame;
+    std::random_device device;
+    std::mt19937 generator { device() };
 
 protected:
     void run() override;
