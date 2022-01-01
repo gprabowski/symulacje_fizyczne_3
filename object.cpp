@@ -325,13 +325,21 @@ void Frame::updatePoints(const std::array<std::array<std::array<QVector3D, 4>, 4
 {
     bezier_cube->updatePoints(p);
 
-    vertices[8] = p[0][3][3] - translation,
-    vertices[9] = p[0][0][3] - translation,
-    vertices[10] = p[3][3][3] - translation,
-    vertices[11] = p[3][0][3] - translation,
-    vertices[12] = p[0][3][0] - translation,
-    vertices[13] = p[0][0][0] - translation,
-    vertices[14] = p[3][3][0] - translation,
-    vertices[15] = p[3][0][0] - translation,
+    vertices[8] = p[0][3][3] - translation;
+    vertices[9] = p[0][0][3] - translation;
+    vertices[10] = p[3][3][3] - translation;
+    vertices[11] = p[3][0][3] - translation;
+    vertices[12] = p[0][3][0] - translation;
+    vertices[13] = p[0][0][0] - translation;
+    vertices[14] = p[3][3][0] - translation;
+    vertices[15] = p[3][0][0] - translation;
     ModifyOpenglData();
+}
+
+void Frame::translateTo(QVector3D pos)
+{
+    for (int i = 8; i < 16; i++)
+        vertices[i] -= (pos - translation);
+    ModifyOpenglData();
+    translation = pos;
 }

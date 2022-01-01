@@ -10,8 +10,7 @@
 template <int N, typename T>
 using triple_array = std::array<std::array<std::array<T, N>, N>, N>;
 
-using point_positions_t = triple_array<4, QVector3D>;
-using frame_position_t = triple_array<2, QVector2D>;
+using points_positions_t = triple_array<4, QVector3D>;
 using single_vel_t = std::array<float, 18>;
 using velocities_t = triple_array<4, single_vel_t>;
 
@@ -76,9 +75,9 @@ public:
 
 public slots:
     void restart(const SimulationSettings& s);
-    void frame_changed(frame_position_t f);
+    void changeFramePosition(QVector3D f);
 signals:
-    void positionChanged(point_positions_t pos);
+    void pointsPositionChanged(points_positions_t pos);
 
 private:
     void precalculate();
@@ -86,14 +85,14 @@ private:
 
     QTimer s_timer;
     SimulationSettings settings;
-    point_positions_t current_positions;
+    points_positions_t current_positions;
     velocities_t current_velocities;
     float dt;
     float pre1_c1;
     float pre1_c2;
     float pre2;
     float mul;
-    frame_position_t frame;
+    QVector3D frame_pos;
     std::random_device device;
     std::mt19937 generator { device() };
 

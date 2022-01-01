@@ -60,12 +60,14 @@ private:
 
     void setCamera();
     void updateCamera();
-    void frame_position_changed(const frame_position_t& frame);
+    void moveFrame(const float x, const float y);
+
+    QVector4D projectFromScreen(const float xpos, const float ypos);
 
 public slots:
     void repaintSlot();
     void restartSimulation();
     void updateSetting();
-    void updateState(point_positions_t pos);
+    void updateState(points_positions_t pos);
     void resetPoints(const int max_points);
 };

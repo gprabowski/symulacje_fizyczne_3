@@ -125,6 +125,8 @@ public:
 
     Frame(const QVector3D pos, const float a, const std::array<std::array<std::array<QVector3D, 4>, 4>, 4>& p, QOpenGLFunctions_4_2_Core* f);
     void updatePoints(const std::array<std::array<std::array<QVector3D, 4>, 4>, 4>& p);
+
+    void translateTo(QVector3D pos);
 };
 
 class Cube : public Object

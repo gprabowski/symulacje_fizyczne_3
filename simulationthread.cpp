@@ -76,7 +76,7 @@ SimulationThread::SimulationThread(const SimulationSettings& s)
 
 void SimulationThread::update() noexcept
 {
-    point_positions_t ret;
+    points_positions_t ret;
     for (int i = 0; i < 4; ++i)
     {
         for (int j = 0; j < 4; ++j)
@@ -119,7 +119,7 @@ void SimulationThread::update() noexcept
         }
     }
     // chyba nie unikniemy kopii
-    emit positionChanged(ret);
+    emit pointsPositionChanged(ret);
     current_positions = std::move(ret);
 }
 
@@ -148,7 +148,7 @@ void SimulationThread::run()
     exec();
 }
 
-void SimulationThread::frame_changed(frame_position_t frame)
+void SimulationThread::changeFramePosition(QVector3D pos)
 {
-    throw std::logic_error("not implemented");
+    // throw std::logic_error("not implemented");
 }

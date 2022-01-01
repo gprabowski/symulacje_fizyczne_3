@@ -15,7 +15,7 @@ OpenGLWidget::OpenGLWidget(QWidget* parent)
 {
     setFocusPolicy(Qt::StrongFocus);
     m_proj = Identity();
-    camera.translation = QVector3D(0, 0, -6.0f);
+    camera.translation = QVector3D(0, 0, -10.0f);
 
     camera.RotateX(-0.8f);
     camera.RotateY(0.8f);
@@ -38,10 +38,19 @@ void OpenGLWidget::updateCamera()
     repaint();
 }
 
+void OpenGLWidget::moveFrame(const float x, const float y)
+{
+    const QVector3D direction_from_screen = projectFromScreen(x, y).toVector3D();
+    const QVector4D camera_pos = Translation(camera.translation) * QVector4D(0, 0, 0, 1) * camera.Rotation() - camera.center.toVector4D();
+    const QVector3D frame_pos = (camera_pos.toVector3D() + direction_from_screen);
+    frame->translateTo(frame_pos);
+    simulation_thread->changeFramePosition(frame_pos);
+}
+
 void OpenGLWidget::initializeGL()
 {
     simulation_thread = std::make_unique<SimulationThread>(simulation_settings);
-    connect(simulation_thread.get(), &SimulationThread::positionChanged, this, &OpenGLWidget::updateState);
+    connect(simulation_thread.get(), &SimulationThread::pointsPositionChanged, this, &OpenGLWidget::updateState);
 
     initializeOpenGLFunctions();
     QOpenGLVersionProfile version;
@@ -63,7 +72,7 @@ void OpenGLWidget::initializeGL()
 
     points = std::make_unique<Points>(1000, f);
 
-    point_positions_t pnts;
+    points_positions_t pnts;
 
     for (int i = 0; i < 4; i++)
     {
@@ -182,27 +191,6 @@ void OpenGLWidget::paintGL()
         frame->bezier_cube->RenderPoints();
         frame->bezier_cube->net->Render();
     }
-
-    /*
-    program.setUniformValue(u_trans, cube->Matrix());
-    program.setUniformValue(u_color, QVector4D(1.0f, 1.0f, 1.0f, 0.9f));
-    if (display_cube)
-        cube->Render();
-
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-    glDisable(GL_DEPTH_TEST);
-    program.setUniformValue(u_gray, true);
-    program.setUniformValue(u_color, QVector4D(1.0f, 0.0f, 1.0f, 1.0f));
-    if (display_diagonal)
-        cube->diagonal->Render();
-    glEnable(GL_DEPTH_TEST);
-
-    program.setUniformValue(u_trans, Identity());
-    program.setUniformValue(u_color, QVector4D(1.0f, 1.0f, 1.0f, 1.0f));
-    points->Render();
-    program.setUniformValue(u_gray, false);
-    */
 }
 
 void OpenGLWidget::mouseMoveEvent(QMouseEvent* event)
@@ -231,6 +219,12 @@ void OpenGLWidget::mouseMoveEvent(QMouseEvent* event)
         }
         updateCamera();
     }
+    else if (event->buttons().testFlag(Qt::LeftButton))
+    {
+        const float x = float(2.0f * event->pos().x()) / float(width()) - 1.0f;
+        const float y = 1.0f - float(2.0f * event->pos().y()) / float(height());
+        moveFrame(x, y);
+    }
 }
 
 void OpenGLWidget::mousePressEvent(QMouseEvent* event)
@@ -239,6 +233,12 @@ void OpenGLWidget::mousePressEvent(QMouseEvent* event)
     {
         draggedRight = true;
         lastMousePoint = event->pos();
+    }
+    if (event->button() == Qt::LeftButton)
+    {
+        const float x = float(2.0f * event->pos().x()) / float(width()) - 1.0f;
+        const float y = 1.0f - float(2.0f * event->pos().y()) / float(height());
+        moveFrame(x, y);
     }
 }
 
@@ -303,7 +303,7 @@ void OpenGLWidget::updateSetting()
     throw std::logic_error("not implemented");
 }
 
-void OpenGLWidget::updateState(point_positions_t pos)
+void OpenGLWidget::updateState(points_positions_t pos)
 {
     frame->updatePoints(pos);
 }
@@ -314,8 +314,19 @@ void OpenGLWidget::resetPoints(const int max_points)
     points.reset(new Points(max_points, f));
 }
 
-void OpenGLWidget::frame_position_changed(const frame_position_t& frame)
+QVector4D OpenGLWidget::projectFromScreen(const float xpos, const float ypos)
 {
-    simulation_thread->frame_changed(frame);
-    throw std::logic_error("not implemented");
+    QVector4D screen_pos = QVector4D(xpos, ypos, 1, 1);
+    QVector4D camera_pos = Translation(camera.translation) * QVector4D(0, 0, 0, 1) * camera.Rotation();
+    camera_pos -= camera.center.toVector4D();
+    QMatrix4x4 inv_proj = m_proj.inverted();
+    QMatrix4x4 inv_view = m_view.inverted();
+    QVector4D v = inv_proj * screen_pos;
+    v.setW(0);
+    v.setZ(1);
+    v = inv_view * v;
+    v.setW(0);
+    v.normalize();
+    v *= -camera.translation.z();
+    return v;
 }
