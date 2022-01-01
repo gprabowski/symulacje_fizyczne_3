@@ -17,6 +17,6 @@ void main()
     color += 0.5*pow(dot(normal, h), 30.0f);
 
     //FragColor = vec4((normal), 1.0f);
-    FragColor = vec4(color, 1.0f);
+    FragColor = vec4(color, 0.8f);
     //FragColor = vec4((view), 1.0f);
 }

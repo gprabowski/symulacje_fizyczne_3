@@ -71,12 +71,14 @@ void OpenGLWidget::initializeGL()
         {
             for (int k = 0; k < 4; k++)
             {
-                pnts[i][j][k] = QVector3D(i, j, k) + QVector3D(float(rand() % 51) / 100.0f - 0.25f, float(rand() % 51) / 100.0f - 0.25f, float(rand() % 51) / 100.0f - 0.25f);
+                pnts[i][j][k] = QVector3D(i - 1.5f, j - 1.5f, k - 1.5f) + QVector3D(float(rand() % 51) / 100.0f - 0.25f, float(rand() % 51) / 100.0f - 0.25f, float(rand() % 51) / 100.0f - 0.25f);
             }
         }
     }
 
-    bezierCube = std::make_unique<BezierCube>(pnts, f);
+    //bezierCube = std::make_unique<BezierCube>(pnts, f);
+
+    frame = std::make_unique<Frame>(QVector3D(0, 0, 0), 3, pnts, f);
 
     program.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/vshader.glsl");
     program.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/fshader.glsl");
@@ -88,7 +90,7 @@ void OpenGLWidget::initializeGL()
     u_inv_view = program.uniformLocation("m_inv_view");
     u_color = program.uniformLocation("m_color");
     u_grid = program.uniformLocation("grid");
-    u_gray = program.uniformLocation("gray");
+    u_shading = program.uniformLocation("shading");
     program.setUniformValue(u_view, m_view);
     program.setUniformValue(u_proj, m_proj);
     program.setUniformValue(u_trans, Identity());
@@ -151,16 +153,35 @@ void OpenGLWidget::paintGL()
 
     program.setUniformValue(u_grid, true);
     program.setUniformValue(u_trans, grid->Matrix());
+    program.setUniformValue(u_shading, false);
     grid->Render();
     program.setUniformValue(u_grid, false);
-
-    glEnable(GL_DEPTH_TEST);
 
     surfacec0_program.bind();
     surfacec0_program.setUniformValue(surfacec0_u_view, m_view);
     surfacec0_program.setUniformValue(surfacec0_u_inv_view, m_inv_view);
     surfacec0_program.setUniformValue(surfacec0_u_proj, m_proj);
-    bezierCube->Render();
+    if (simulation_settings.show_jelly)
+        frame->bezier_cube->Render();
+
+    glEnable(GL_DEPTH_TEST);
+
+    program.bind();
+    program.setUniformValue(u_shading, false);
+    program.setUniformValue(u_view, m_view);
+    program.setUniformValue(u_inv_view, m_inv_view);
+    program.setUniformValue(u_trans, frame->Matrix());
+    program.setUniformValue(u_color, QVector4D(0.0f, 1.0f, 0.0f, 1.0f));
+    if (simulation_settings.show_control_frame)
+        frame->Render();
+
+    if (simulation_settings.show_control_points)
+    {
+        program.setUniformValue(u_trans, Identity());
+        program.setUniformValue(u_color, QVector4D(1.0f, 0.0f, 1.0f, 1.0f));
+        frame->bezier_cube->RenderPoints();
+        frame->bezier_cube->net->Render();
+    }
 
     /*
     program.setUniformValue(u_trans, cube->Matrix());
@@ -284,7 +305,7 @@ void OpenGLWidget::updateSetting()
 
 void OpenGLWidget::updateState(point_positions_t pos)
 {
-    bezierCube->updatePoints(pos);
+    frame->updatePoints(pos);
 }
 
 void OpenGLWidget::resetPoints(const int max_points)

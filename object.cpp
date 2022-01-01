@@ -182,6 +182,13 @@ void BezierCube::Render()
     f->glBindVertexArray(0);
 }
 
+void BezierCube::RenderPoints()
+{
+    f->glBindVertexArray(VAO);
+    f->glDrawElements(GL_POINTS, indices.size(), GL_UNSIGNED_INT, 0);
+    f->glBindVertexArray(0);
+}
+
 void BezierCube::updatePoints(const std::array<std::array<std::array<QVector3D, 4>, 4>, 4>& p)
 {
     const auto toIdx = [&](const int i, const int j, const int k) -> unsigned int
@@ -194,10 +201,12 @@ void BezierCube::updatePoints(const std::array<std::array<std::array<QVector3D, 
             for (int k = 0; k < 4; k++)
             {
                 vertices[toIdx(i, j, k)] = p[i][j][k];
+                net->vertices[toIdx(i, j, k)] = p[i][j][k];
             }
         }
     }
     ModifyOpenglData();
+    net->ModifyOpenglData();
 }
 
 BezierCube::BezierCube(const std::array<std::array<std::array<QVector3D, 4>, 4>, 4>& p, QOpenGLFunctions_4_2_Core* f)
@@ -253,6 +262,76 @@ BezierCube::BezierCube(const std::array<std::array<std::array<QVector3D, 4>, 4>,
         }
     }
 
+    net = std::make_unique<Object>(f);
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            for (int k = 0; k < 3; k++)
+            {
+                net->indices.add_edge({ toIdx(i, j, k), toIdx(i + 1, j, k) });
+                net->indices.add_edge({ toIdx(i, j, k), toIdx(i, j + 1, k) });
+                net->indices.add_edge({ toIdx(i, j, k), toIdx(i, j, k + 1) });
+            }
+        }
+    }
+    for (int j = 0; j < 3; j++)
+    {
+        for (int k = 0; k < 3; k++)
+        {
+            net->indices.add_edge({ toIdx(3, j, k), toIdx(3, j + 1, k) });
+            net->indices.add_edge({ toIdx(3, j, k), toIdx(3, j, k + 1) });
+            net->indices.add_edge({ toIdx(j, 3, k), toIdx(j + 1, 3, k) });
+            net->indices.add_edge({ toIdx(j, 3, k), toIdx(j, 3, k + 1) });
+            net->indices.add_edge({ toIdx(j, k, 3), toIdx(j + 1, k, 3) });
+            net->indices.add_edge({ toIdx(j, k, 3), toIdx(j, k + 1, 3) });
+        }
+    }
+    for (int k = 0; k < 3; k++)
+    {
+        net->indices.add_edge({ toIdx(3, 3, k), toIdx(3, 3, k + 1) });
+        net->indices.add_edge({ toIdx(3, k, 3), toIdx(3, k + 1, 3) });
+        net->indices.add_edge({ toIdx(k, 3, 3), toIdx(k + 1, 3, 3) });
+    }
+
     vertices.resize(64);
+    net->vertices.resize(64);
     updatePoints(p);
+}
+
+Frame::Frame(const QVector3D pos, const float a, const std::array<std::array<std::array<QVector3D, 4>, 4>, 4>& p, QOpenGLFunctions_4_2_Core* f)
+    : Object({ //cube
+                 { -0.5f * a, 0.5f * a, 0.5f * a },
+                 { -0.5f * a, -0.5f * a, 0.5f * a },
+                 { 0.5f * a, 0.5f * a, 0.5f * a },
+                 { 0.5f * a, -0.5f * a, 0.5f * a },
+                 { -0.5f * a, 0.5f * a, -0.5f * a },
+                 { -0.5f * a, -0.5f * a, -0.5f * a },
+                 { 0.5f * a, 0.5f * a, -0.5f * a },
+                 { 0.5f * a, -0.5f * a, -0.5f * a },
+                 //8 bezier cube verticles
+                 p[0][3][3] - pos, p[0][0][3] - pos, p[3][3][3] - pos, p[3][0][3] - pos,
+                 p[0][3][0] - pos, p[0][0][0] - pos, p[3][3][0] - pos, p[3][0][0] - pos },
+        { /*cube*/ 0, 1, 1, 3, 3, 2, 2, 0, 4, 5, 5, 7, 7, 6, 6, 4, 0, 4, 1, 5, 3, 7, 2, 6,
+            /*springs*/ 0, 8, 1, 9, 2, 10, 3, 11, 4, 12, 5, 13, 6, 14, 7, 15 },
+        f)
+{
+    translation = pos;
+    mode = DrawMode::Edges;
+    bezier_cube = std::make_unique<BezierCube>(p, f);
+}
+
+void Frame::updatePoints(const std::array<std::array<std::array<QVector3D, 4>, 4>, 4>& p)
+{
+    bezier_cube->updatePoints(p);
+
+    vertices[8] = p[0][3][3] - translation,
+    vertices[9] = p[0][0][3] - translation,
+    vertices[10] = p[3][3][3] - translation,
+    vertices[11] = p[3][0][3] - translation,
+    vertices[12] = p[0][3][0] - translation,
+    vertices[13] = p[0][0][0] - translation,
+    vertices[14] = p[3][3][0] - translation,
+    vertices[15] = p[3][0][0] - translation,
+    ModifyOpenglData();
 }

@@ -5,7 +5,7 @@ in vec3 view;
 
 uniform vec4 m_color;
 uniform bool grid;
-uniform bool gray;
+uniform bool shading;
 
 out vec4 FragColor;
 
@@ -15,6 +15,8 @@ void main()
 {
     if (!grid){
         FragColor = m_color;
+        if (!shading)
+            return;
 
         vec3 normal = -normalize(cross(dFdx(wpos), dFdy(wpos)));
         float intensity = 0.3f;
@@ -24,10 +26,6 @@ void main()
         intensity += 0.7f * pow(clamp(dot(normal, h), 0.0f, 1.0f), 16.0f);
         intensity = min(intensity, 1.0f);
         FragColor = vec4(intensity * FragColor.rgb, m_color.a);
-
-
-        if (gray)
-            FragColor = m_color;
     }else{
         vec2 coord = wpos.xz;
         vec2 derivative = fwidth(coord);

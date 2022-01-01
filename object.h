@@ -109,10 +109,22 @@ public:
 class BezierCube : public Object
 {
 public:
+    std::unique_ptr<Object> net;
+
     virtual void Render() override;
+    void RenderPoints();
     void updatePoints(const std::array<std::array<std::array<QVector3D, 4>, 4>, 4>& p);
 
     BezierCube(const std::array<std::array<std::array<QVector3D, 4>, 4>, 4>& p, QOpenGLFunctions_4_2_Core* f);
+};
+
+class Frame : public Object
+{
+public:
+    std::unique_ptr<BezierCube> bezier_cube;
+
+    Frame(const QVector3D pos, const float a, const std::array<std::array<std::array<QVector3D, 4>, 4>, 4>& p, QOpenGLFunctions_4_2_Core* f);
+    void updatePoints(const std::array<std::array<std::array<QVector3D, 4>, 4>, 4>& p);
 };
 
 class Cube : public Object
