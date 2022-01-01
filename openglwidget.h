@@ -27,23 +27,18 @@ public:
     std::unique_ptr<SimulationThread> simulation_thread;
 
 private:
-    std::unique_ptr<Cube> cube;
-    std::unique_ptr<Points> points;
-    //std::unique_ptr<BezierCube> bezierCube;
-    std::unique_ptr<Frame> frame;
-    const QQuaternion base_cube_rotation = QQuaternion::rotationTo(QVector3D(1.0f, 1.0f, 1.0f), QVector3D(0, 1.0f, 0));
-
     QOpenGLFunctions_4_2_Core* f;
 
     QMatrix4x4 m_proj, m_view, m_inv_view;
     GLuint u_proj, u_view, u_trans, u_inv_view, u_grid, u_color, u_shading;
 
-    Camera camera;
-
-    std::unique_ptr<Object> grid;
-
     QOpenGLShaderProgram program, surfacec0_program;
     GLuint surfacec0_u_view, surfacec0_u_proj, surfacec0_u_segments_in, surfacec0_u_segments_out, surfacec0_u_inv_view;
+
+    Camera camera;
+    std::unique_ptr<Object> grid;
+    std::unique_ptr<Frame> frame;
+    std::unique_ptr<Object> bounding_box;
 
     void initializeGL() override;
     void resizeGL(int w, int h) override;
@@ -61,6 +56,7 @@ private:
     void setCamera();
     void updateCamera();
     void moveFrame(const float x, const float y);
+    void limitFramePosToBounds(QVector3D& pos);
 
     QVector4D projectFromScreen(const float xpos, const float ypos);
 
@@ -69,5 +65,4 @@ public slots:
     void restartSimulation();
     void updateSetting();
     void updateState(points_positions_t pos);
-    void resetPoints(const int max_points);
 };

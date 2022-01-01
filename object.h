@@ -128,26 +128,3 @@ public:
 
     void translateTo(QVector3D pos);
 };
-
-class Cube : public Object
-{
-private:
-    Cube(const std::vector<QVector3D>& p, const IndicesBuffer& i, QOpenGLFunctions_4_2_Core* f);
-
-public:
-    std::unique_ptr<Object> diagonal;
-    Cube(QOpenGLFunctions_4_2_Core* f);
-};
-
-class Points : public Object
-{
-    int current = 0;
-    int last = 0;
-    int max_vertices = 0;
-
-public:
-    Points(const int n, QOpenGLFunctions_4_2_Core* f);
-    virtual void Render() override;
-    void AddPoint(const QVector3D& p);
-    void ResetPoints();
-};

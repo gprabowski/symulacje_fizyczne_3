@@ -120,60 +120,6 @@ QMatrix4x4 Camera::Rotation() const
     return RotationX(rotationX) * RotationY(rotationY);
 }
 
-Cube::Cube(QOpenGLFunctions_4_2_Core* f)
-    : Object({ { 0.0f, 1.0f, 1.0f },
-                 { 0.0f, 0.0f, 1.0f },
-                 { 1.0f, 1.0f, 1.0f },
-                 { 1.0f, 0.0f, 1.0f },
-                 { 0.0f, 1.0f, 0.0f },
-                 { 0.0f, 0.0f, 0.0f },
-                 { 1.0f, 1.0f, 0.0f },
-                 { 1.0f, 0.0f, 0.0f } },
-        { 0, 2, 3, 0, 3, 1,
-            2, 6, 7, 2, 7, 3,
-            6, 4, 5, 6, 5, 7,
-            4, 0, 1, 4, 1, 5,
-            0, 4, 6, 0, 6, 2,
-            1, 5, 7, 1, 7, 3 },
-        f)
-{
-    mode = DrawMode::Triangles;
-    diagonal = std::make_unique<Object>(std::vector<QVector3D>({ { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f } }), IndicesBuffer({ 0, 1 }), f);
-}
-
-Points::Points(const int n, QOpenGLFunctions_4_2_Core* f)
-    : Object(f)
-{
-    max_vertices = n;
-    vertices.resize(n);
-    indices.resize(n);
-    for (int i = 0; i < n; i++)
-        indices[i] = i;
-    ModifyOpenglData();
-}
-
-void Points::Render()
-{
-    ModifyOpenglData();
-    f->glBindVertexArray(VAO);
-    f->glDrawElements(GL_POINTS, last, GL_UNSIGNED_INT, 0);
-    f->glBindVertexArray(0);
-}
-
-void Points::AddPoint(const QVector3D& p)
-{
-    vertices[current++] = p;
-    last++;
-    last = std::min(last, max_vertices);
-    current %= max_vertices;
-}
-
-void Points::ResetPoints()
-{
-    current = 0;
-    last = 0;
-}
-
 void BezierCube::Render()
 {
     f->glBindVertexArray(VAO);

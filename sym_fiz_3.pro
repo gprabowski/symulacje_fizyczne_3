@@ -14,7 +14,8 @@ HEADERS += \
     functions.h \
     object.h \
     mainwindow.h \
-    simulationthread.h
+    simulationthread.h \
+    common.h
 
 FORMS += \
     mainwindow.ui \

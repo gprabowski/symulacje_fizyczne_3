@@ -1,4 +1,5 @@
 #include "openglwidget.h"
+
 #include <QDebug>
 #include <fstream>
 #include <iostream>
@@ -10,15 +11,16 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVersionFunctionsFactory>
 
+#include "common.h"
+
 OpenGLWidget::OpenGLWidget(QWidget* parent)
     : QOpenGLWidget(parent)
 {
     setFocusPolicy(Qt::StrongFocus);
     m_proj = Identity();
-    camera.translation = QVector3D(0, 0, -10.0f);
+    camera.translation = QVector3D(0, 0, -14.0f);
 
-    camera.RotateX(-0.8f);
-    camera.RotateY(0.8f);
+    camera.RotateX(-0.5f);
 
     m_view = camera.Matrix();
 
@@ -42,9 +44,17 @@ void OpenGLWidget::moveFrame(const float x, const float y)
 {
     const QVector3D direction_from_screen = projectFromScreen(x, y).toVector3D();
     const QVector4D camera_pos = Translation(camera.translation) * QVector4D(0, 0, 0, 1) * camera.Rotation() - camera.center.toVector4D();
-    const QVector3D frame_pos = (camera_pos.toVector3D() + direction_from_screen);
+    QVector3D frame_pos = (camera_pos.toVector3D() + direction_from_screen);
+    limitFramePosToBounds(frame_pos);
     frame->translateTo(frame_pos);
     simulation_thread->changeFramePosition(frame_pos);
+}
+
+void OpenGLWidget::limitFramePosToBounds(QVector3D& pos)
+{
+    pos.setX(std::clamp(pos.x(), -(kBoundingBoxEdge - kFrameEdge) / 2.0f, (kBoundingBoxEdge - kFrameEdge) / 2.0f));
+    pos.setY(std::clamp(pos.y(), -(kBoundingBoxEdge - kFrameEdge) / 2.0f, (kBoundingBoxEdge - kFrameEdge) / 2.0f));
+    pos.setZ(std::clamp(pos.z(), -(kBoundingBoxEdge - kFrameEdge) / 2.0f, (kBoundingBoxEdge - kFrameEdge) / 2.0f));
 }
 
 void OpenGLWidget::initializeGL()
@@ -67,11 +77,6 @@ void OpenGLWidget::initializeGL()
     grid->mode = DrawMode::Triangles;
     grid->translation.setY(0.001f);
 
-    cube = std::make_unique<Cube>(f);
-    cube->rotation = base_cube_rotation;
-
-    points = std::make_unique<Points>(1000, f);
-
     points_positions_t pnts;
 
     for (int i = 0; i < 4; i++)
@@ -80,14 +85,23 @@ void OpenGLWidget::initializeGL()
         {
             for (int k = 0; k < 4; k++)
             {
-                pnts[i][j][k] = QVector3D(i - 1.5f, j - 1.5f, k - 1.5f) + QVector3D(float(rand() % 51) / 100.0f - 0.25f, float(rand() % 51) / 100.0f - 0.25f, float(rand() % 51) / 100.0f - 0.25f);
+                pnts[i][j][k] = QVector3D(i - kFrameEdge / 2.0f, j - kFrameEdge / 2.0f, k - kFrameEdge / 2.0f) + QVector3D(float(rand() % 51) / 100.0f - 0.25f, float(rand() % 51) / 100.0f - 0.25f, float(rand() % 51) / 100.0f - 0.25f);
             }
         }
     }
 
-    //bezierCube = std::make_unique<BezierCube>(pnts, f);
+    frame = std::make_unique<Frame>(QVector3D(0, 0, 0), kFrameEdge, pnts, f);
 
-    frame = std::make_unique<Frame>(QVector3D(0, 0, 0), 3, pnts, f);
+    bounding_box = std::make_unique<Object>(std::vector<QVector3D>({ { -0.5f * kBoundingBoxEdge, 0.5f * kBoundingBoxEdge, 0.5f * kBoundingBoxEdge },
+                                                { -0.5f * kBoundingBoxEdge, -0.5f * kBoundingBoxEdge, 0.5f * kBoundingBoxEdge },
+                                                { 0.5f * kBoundingBoxEdge, 0.5f * kBoundingBoxEdge, 0.5f * kBoundingBoxEdge },
+                                                { 0.5f * kBoundingBoxEdge, -0.5f * kBoundingBoxEdge, 0.5f * kBoundingBoxEdge },
+                                                { -0.5f * kBoundingBoxEdge, 0.5f * kBoundingBoxEdge, -0.5f * kBoundingBoxEdge },
+                                                { -0.5f * kBoundingBoxEdge, -0.5f * kBoundingBoxEdge, -0.5f * kBoundingBoxEdge },
+                                                { 0.5f * kBoundingBoxEdge, 0.5f * kBoundingBoxEdge, -0.5f * kBoundingBoxEdge },
+                                                { 0.5f * kBoundingBoxEdge, -0.5f * kBoundingBoxEdge, -0.5f * kBoundingBoxEdge } }),
+        IndicesBuffer({ 0, 1, 1, 3, 3, 2, 2, 0, 4, 5, 5, 7, 7, 6, 6, 4, 0, 4, 1, 5, 3, 7, 2, 6 }),
+        f);
 
     program.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/vshader.glsl");
     program.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/fshader.glsl");
@@ -191,6 +205,10 @@ void OpenGLWidget::paintGL()
         frame->bezier_cube->RenderPoints();
         frame->bezier_cube->net->Render();
     }
+
+    program.setUniformValue(u_trans, Identity());
+    program.setUniformValue(u_color, QVector4D(1.0f, 0.0f, 0.0f, 1.0f));
+    bounding_box->Render();
 }
 
 void OpenGLWidget::mouseMoveEvent(QMouseEvent* event)
@@ -306,12 +324,6 @@ void OpenGLWidget::updateSetting()
 void OpenGLWidget::updateState(points_positions_t pos)
 {
     frame->updatePoints(pos);
-}
-
-void OpenGLWidget::resetPoints(const int max_points)
-{
-    makeCurrent();
-    points.reset(new Points(max_points, f));
 }
 
 QVector4D OpenGLWidget::projectFromScreen(const float xpos, const float ypos)
