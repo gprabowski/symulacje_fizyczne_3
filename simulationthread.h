@@ -11,8 +11,7 @@ template <int N, typename T>
 using triple_array = std::array<std::array<std::array<T, N>, N>, N>;
 
 using points_positions_t = triple_array<4, QVector3D>;
-using single_vel_t = std::array<float, 18>;
-using velocities_t = triple_array<4, single_vel_t>;
+using velocities_t = triple_array<4, QVector3D>;
 
 struct euler_out_t
 {
