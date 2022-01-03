@@ -99,6 +99,7 @@ void SimulationThread::update() noexcept
                 // i potem policzyć drugiej na nowych danych)
 
                 ret[i][j][k] = curr_pos + dt * current_velocities[i][j][k];
+                auto& new_pos = ret[i][j][k];
 
 
                 auto one_time_term = -settings.k * curr_vel;
@@ -117,17 +118,17 @@ void SimulationThread::update() noexcept
                     if (idx1 >= 0 && idx1 < 4 && idx2 >= 0 && idx2 < 4 && idx3 >= 0 && idx3 < 4)
                     {
                         const auto& pos2 = current_positions[idx1][idx2][idx3];
-                        const auto dist = (curr_pos - pos2).length();
+                        const auto dist = (pos2 - new_pos).length();
                         // velocity += (elasticity * (l0 - position) - stickiness * velocity + h) * 1/weight * dt;
-                        iterated_term += (-settings.c1 * (settings.l0 * p.mult - dist)) * (pos2 - curr_pos).normalized();
+                        iterated_term += (-settings.c1 * (settings.l0 * p.mult - dist)) * (pos2 - new_pos).normalized();
                     }
                 }
 
                 if(is_corner(i, j, k)) {
                     // add velocity change caused by frame
-                    auto frame_vec = (curr_pos - (frame_pos + QVector3D(i -1.5, j - 1.5, k - 1.5)));
+                    auto frame_vec = ((frame_pos + QVector3D(i -1.5, j - 1.5, k - 1.5)) - new_pos);
                     float frame_dist = frame_vec.length();
-                    iterated_term += (-settings.c2 * (frame_dist)) * frame_vec.normalized();
+                    iterated_term += (settings.c2 * (frame_dist)) * frame_vec.normalized();
                 }
 
                 curr_vel += (one_time_term + iterated_term) * 1/settings.mass * dt;
