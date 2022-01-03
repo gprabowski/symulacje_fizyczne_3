@@ -35,18 +35,18 @@ struct SimulationSettings
     //  6. zaburzenie
     bool use_randomization { true };
     //  7. zmiana masy punktów kontrolnych
-    float mass { 1.0f };
+    float mass { 0.1f };
     //  8. wartość tłumienia k
-    float k { 1.0f };
+    float k { 0.4f };
     //  9. współczynnik sprężystości c1 (połączeń między masami)
-    float c1 { 1.0f };
+    float c1 { 30.0f };
     //  10. c2 (kostka a ramka sterująca)
-    float c2 { 1.0f };
+    float c2 { 50.0f };
     //  11. początkowe zaburzenie, określające maksymalną wartość losowanych prędkości lub odchyleń
-    float random_max { 1.0f };
+    float random_max { 0.3f };
 
     // 12. dt in ms
-    int dt_ms { 20 };
+    int dt_ms { 1 };
 
     // 13. l0
     float l0 { 1.0f };

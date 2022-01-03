@@ -52,9 +52,9 @@ void OpenGLWidget::moveFrame(const float x, const float y)
 
 void OpenGLWidget::limitFramePosToBounds(QVector3D& pos)
 {
-    pos.setX(std::clamp(pos.x(), -(kBoundingBoxEdge - kFrameEdge) / 2.0f, (kBoundingBoxEdge - kFrameEdge) / 2.0f));
-    pos.setY(std::clamp(pos.y(), -(kBoundingBoxEdge - kFrameEdge) / 2.0f, (kBoundingBoxEdge - kFrameEdge) / 2.0f));
-    pos.setZ(std::clamp(pos.z(), -(kBoundingBoxEdge - kFrameEdge) / 2.0f, (kBoundingBoxEdge - kFrameEdge) / 2.0f));
+    pos.setX(std::clamp(pos.x(), -(kFrameBoundingBoxEdge - kFrameEdge) / 2.0f, (kFrameBoundingBoxEdge - kFrameEdge) / 2.0f));
+    pos.setY(std::clamp(pos.y(), -(kFrameBoundingBoxEdge - kFrameEdge) / 2.0f, (kFrameBoundingBoxEdge - kFrameEdge) / 2.0f));
+    pos.setZ(std::clamp(pos.z(), -(kFrameBoundingBoxEdge - kFrameEdge) / 2.0f, (kFrameBoundingBoxEdge - kFrameEdge) / 2.0f));
 }
 
 void OpenGLWidget::initializeGL()

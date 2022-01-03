@@ -111,8 +111,11 @@ Cube Connections</string>
           </item>
           <item row="2" column="1">
            <widget class="QDoubleSpinBox" name="massSpinBox">
+            <property name="minimum">
+             <double>0.010000000000000</double>
+            </property>
             <property name="value">
-             <double>1.000000000000000</double>
+             <double>0.100000000000000</double>
             </property>
            </widget>
           </item>
@@ -147,21 +150,21 @@ Cube Connections</string>
           <item row="3" column="1">
            <widget class="QDoubleSpinBox" name="kSpinBox">
             <property name="value">
-             <double>1.000000000000000</double>
+             <double>0.400000000000000</double>
             </property>
            </widget>
           </item>
           <item row="4" column="1">
            <widget class="QDoubleSpinBox" name="c1SpinBox">
             <property name="value">
-             <double>1.000000000000000</double>
+             <double>30.000000000000000</double>
             </property>
            </widget>
           </item>
           <item row="5" column="1">
            <widget class="QDoubleSpinBox" name="c2SpinBox">
             <property name="value">
-             <double>1.000000000000000</double>
+             <double>50.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -182,7 +185,7 @@ Cube Connections</string>
           <item row="6" column="1">
            <widget class="QDoubleSpinBox" name="randomSpinBox">
             <property name="value">
-             <double>1.000000000000000</double>
+             <double>0.400000000000000</double>
             </property>
            </widget>
           </item>
@@ -195,8 +198,11 @@ Cube Connections</string>
           </item>
           <item row="7" column="1">
            <widget class="QSpinBox" name="dtSpinBox">
+            <property name="minimum">
+             <number>1</number>
+            </property>
             <property name="value">
-             <number>5</number>
+             <number>1</number>
             </property>
            </widget>
           </item>
@@ -265,7 +271,7 @@ Cube Connections</string>
      <x>0</x>
      <y>0</y>
      <width>1070</width>
-     <height>22</height>
+     <height>20</height>
     </rect>
    </property>
   </widget>
