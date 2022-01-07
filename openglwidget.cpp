@@ -220,19 +220,24 @@ void OpenGLWidget::paintGL()
         bounding_box->Render();
     }
 
-    model_program.bind();
-    model_program.setUniformValue(model_u_view, m_view);
-    model_program.setUniformValue(model_u_inv_view, m_inv_view);
-    model_program.setUniformValue(model_u_proj, m_proj);
-    model_program.setUniformValueArray(model_u_points, (QVector3D*)control_points.data(), 64);
-    model->Render();
+    if (simulation_settings.show_inner)
+    {
+        model_program.bind();
+        model_program.setUniformValue(model_u_view, m_view);
+        model_program.setUniformValue(model_u_inv_view, m_inv_view);
+        model_program.setUniformValue(model_u_proj, m_proj);
+        model_program.setUniformValueArray(model_u_points, (QVector3D*)control_points.data(), 64);
+        model->Render();
+    }
 
-    surfacec0_program.bind();
-    surfacec0_program.setUniformValue(surfacec0_u_view, m_view);
-    surfacec0_program.setUniformValue(surfacec0_u_inv_view, m_inv_view);
-    surfacec0_program.setUniformValue(surfacec0_u_proj, m_proj);
     if (simulation_settings.show_jelly)
+    {
+        surfacec0_program.bind();
+        surfacec0_program.setUniformValue(surfacec0_u_view, m_view);
+        surfacec0_program.setUniformValue(surfacec0_u_inv_view, m_inv_view);
+        surfacec0_program.setUniformValue(surfacec0_u_proj, m_proj);
         frame->bezier_cube->Render();
+    }
 }
 
 void OpenGLWidget::mouseMoveEvent(QMouseEvent* event)
