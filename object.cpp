@@ -5,6 +5,9 @@
 
 #include <QVector2D>
 
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "tiny_obj_loader.h"
+
 QMatrix4x4 Transformation::Matrix() const
 {
     return Translation(translation) * Rotation() * Scale(scaleVector);
@@ -53,6 +56,49 @@ Object::Object(QOpenGLFunctions_4_2_Core* f)
     f->glGenVertexArrays(1, &VAO);
     f->glGenBuffers(1, &VBO);
     f->glGenBuffers(1, &EBO);
+}
+
+Object::Object(QOpenGLFunctions_4_2_Core* f, std::string filename)
+    : Object(f)
+{
+    tinyobj::attrib_t attrib;
+    std::vector<tinyobj::shape_t> shapes;
+    std::vector<tinyobj::material_t> materials;
+    std::string warn, err;
+
+    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filename.c_str()))
+    {
+        throw std::runtime_error(warn + err);
+    }
+    const auto& ind = shapes.front().mesh.indices;
+    const auto& points = attrib.vertices;
+    vertices.reserve(points.size() / 3);
+    for (int i = 0; i < points.size() / 3; i++)
+        vertices.push_back(QVector3D(points[3 * i], points[3 * i + 1], points[3 * i + 2]));
+    indices.reserve(ind.size());
+    for (int i = 0; i < ind.size(); i++)
+        indices.push_back(ind[i].vertex_index);
+
+    float min = vertices.front().x(), max = vertices.front().x();
+
+    for (const auto& v : vertices)
+    {
+        min = std::min(min, v.x());
+        min = std::min(min, v.y());
+        min = std::min(min, v.z());
+
+        max = std::max(max, v.x());
+        max = std::max(max, v.y());
+        max = std::max(max, v.z());
+    }
+    for (auto& v : vertices)
+    {
+        v -= QVector3D(min, min, min);
+        v /= QVector3D(max - min, max - min, max - min);
+    }
+
+    mode = DrawMode::Triangles;
+    ModifyOpenglData();
 }
 
 Object::~Object()

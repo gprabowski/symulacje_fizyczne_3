@@ -67,6 +67,7 @@ class Object : public Transformation
 public:
     Object(const std::vector<QVector3D>& p, const IndicesBuffer& i, QOpenGLFunctions_4_2_Core* f);
     Object(QOpenGLFunctions_4_2_Core* f);
+    Object(QOpenGLFunctions_4_2_Core* f, std::string filename);
     ~Object();
 
     virtual void Render();

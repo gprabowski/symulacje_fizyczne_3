@@ -6,7 +6,7 @@ in vec3 view;
 
 out vec4 FragColor;
 
-const vec3 light_pos = vec3(2.0f, 8.0f, 2.0f);
+const vec3 light_pos = vec3(0.0f, 10.0f, 0.0f);
 
 void main()
 {
@@ -17,6 +17,6 @@ void main()
     color += 0.5*pow(dot(normal, h), 30.0f);
 
     //FragColor = vec4((normal), 1.0f);
-    FragColor = vec4(color, 0.8f);
+    FragColor = vec4(color, 0.85f);
     //FragColor = vec4((view), 1.0f);
 }

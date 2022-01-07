@@ -1,6 +1,7 @@
 QT += core gui widgets openglwidgets charts
 
 CONFIG += c++17
+CONFIG += file_copies
 
 SOURCES += \
     openglwidget.cpp \
@@ -21,6 +22,11 @@ FORMS += \
     mainwindow.ui \
 
 RESOURCES  = shaders/shaders.qrc
+
+COPIES = model
+model.files = $$files(model.obj)
+model.path = $$OUT_PWD/
+
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

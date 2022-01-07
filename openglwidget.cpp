@@ -77,20 +77,18 @@ void OpenGLWidget::initializeGL()
     grid->mode = DrawMode::Triangles;
     grid->translation.setY(0.001f);
 
-    points_positions_t pnts;
-
     for (int i = 0; i < 4; i++)
     {
         for (int j = 0; j < 4; j++)
         {
             for (int k = 0; k < 4; k++)
             {
-                pnts[i][j][k] = QVector3D(i - kFrameEdge / 2.0f, j - kFrameEdge / 2.0f, k - kFrameEdge / 2.0f) + QVector3D(float(rand() % 51) / 100.0f - 0.25f, float(rand() % 51) / 100.0f - 0.25f, float(rand() % 51) / 100.0f - 0.25f);
+                control_points[i][j][k] = QVector3D(i - kFrameEdge / 2.0f, j - kFrameEdge / 2.0f, k - kFrameEdge / 2.0f) + QVector3D(float(rand() % 51) / 100.0f - 0.25f, float(rand() % 51) / 100.0f - 0.25f, float(rand() % 51) / 100.0f - 0.25f);
             }
         }
     }
 
-    frame = std::make_unique<Frame>(QVector3D(0, 0, 0), kFrameEdge, pnts, f);
+    frame = std::make_unique<Frame>(QVector3D(0, 0, 0), kFrameEdge, control_points, f);
 
     bounding_box = std::make_unique<Object>(std::vector<QVector3D>({ { -0.5f * kBoundingBoxEdge, 0.5f * kBoundingBoxEdge, 0.5f * kBoundingBoxEdge },
                                                 { -0.5f * kBoundingBoxEdge, -0.5f * kBoundingBoxEdge, 0.5f * kBoundingBoxEdge },
@@ -102,6 +100,8 @@ void OpenGLWidget::initializeGL()
                                                 { 0.5f * kBoundingBoxEdge, -0.5f * kBoundingBoxEdge, -0.5f * kBoundingBoxEdge } }),
         IndicesBuffer({ 0, 1, 1, 3, 3, 2, 2, 0, 4, 5, 5, 7, 7, 6, 6, 4, 0, 4, 1, 5, 3, 7, 2, 6 }),
         f);
+
+    model = std::make_unique<Object>(f, "model.obj");
 
     program.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/vshader.glsl");
     program.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/fshader.glsl");
@@ -136,6 +136,15 @@ void OpenGLWidget::initializeGL()
     surfacec0_program.setUniformValue(surfacec0_u_segments_in, 20);
     surfacec0_program.setUniformValue(surfacec0_u_segments_out, 20);
 
+    model_program.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/model_v.glsl");
+    model_program.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/model_f.glsl");
+    model_program.link();
+    model_program.bind();
+    model_u_view = model_program.uniformLocation("m_view");
+    model_u_proj = model_program.uniformLocation("m_proj");
+    model_u_inv_view = model_program.uniformLocation("m_inv_view");
+    model_u_points = model_program.uniformLocation("points");
+
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -143,7 +152,7 @@ void OpenGLWidget::initializeGL()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glEnable(GL_PROGRAM_POINT_SIZE);
     glEnable(GL_LINE_SMOOTH);
 
@@ -157,6 +166,10 @@ void OpenGLWidget::resizeGL(int w, int h)
 
     program.bind();
     program.setUniformValue(u_proj, m_proj);
+    surfacec0_program.bind();
+    surfacec0_program.setUniformValue(surfacec0_u_proj, m_proj);
+    model_program.bind();
+    model_program.setUniformValue(model_u_proj, m_proj);
 }
 
 void OpenGLWidget::paintGL()
@@ -170,7 +183,7 @@ void OpenGLWidget::paintGL()
     program.setUniformValue(u_view, m_view);
     program.setUniformValue(u_inv_view, m_inv_view);
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     glDisable(GL_DEPTH_TEST);
 
@@ -180,16 +193,9 @@ void OpenGLWidget::paintGL()
     grid->Render();
     program.setUniformValue(u_grid, false);
 
-    surfacec0_program.bind();
-    surfacec0_program.setUniformValue(surfacec0_u_view, m_view);
-    surfacec0_program.setUniformValue(surfacec0_u_inv_view, m_inv_view);
-    surfacec0_program.setUniformValue(surfacec0_u_proj, m_proj);
-    if (simulation_settings.show_jelly)
-        frame->bezier_cube->Render();
-
     glEnable(GL_DEPTH_TEST);
 
-    program.bind();
+    //program.bind();
     program.setUniformValue(u_shading, false);
     program.setUniformValue(u_view, m_view);
     program.setUniformValue(u_inv_view, m_inv_view);
@@ -198,6 +204,7 @@ void OpenGLWidget::paintGL()
     if (simulation_settings.show_control_frame)
         frame->Render();
 
+    //program.bind();
     if (simulation_settings.show_control_points)
     {
         program.setUniformValue(u_trans, Identity());
@@ -206,9 +213,26 @@ void OpenGLWidget::paintGL()
         frame->bezier_cube->net->Render();
     }
 
-    program.setUniformValue(u_trans, Identity());
-    program.setUniformValue(u_color, QVector4D(1.0f, 0.0f, 0.0f, 1.0f));
-    bounding_box->Render();
+    if (simulation_settings.show_constraint)
+    {
+        program.setUniformValue(u_trans, Identity());
+        program.setUniformValue(u_color, QVector4D(1.0f, 0.0f, 0.0f, 1.0f));
+        bounding_box->Render();
+    }
+
+    model_program.bind();
+    model_program.setUniformValue(model_u_view, m_view);
+    model_program.setUniformValue(model_u_inv_view, m_inv_view);
+    model_program.setUniformValue(model_u_proj, m_proj);
+    model_program.setUniformValueArray(model_u_points, (QVector3D*)control_points.data(), 64);
+    model->Render();
+
+    surfacec0_program.bind();
+    surfacec0_program.setUniformValue(surfacec0_u_view, m_view);
+    surfacec0_program.setUniformValue(surfacec0_u_inv_view, m_inv_view);
+    surfacec0_program.setUniformValue(surfacec0_u_proj, m_proj);
+    if (simulation_settings.show_jelly)
+        frame->bezier_cube->Render();
 }
 
 void OpenGLWidget::mouseMoveEvent(QMouseEvent* event)
@@ -312,7 +336,6 @@ void OpenGLWidget::repaintSlot()
 void OpenGLWidget::restartSimulation()
 {
     simulation_thread->restart(simulation_settings);
-    // throw std::logic_error("not implemented");
 }
 
 void OpenGLWidget::updateSetting()
@@ -324,6 +347,7 @@ void OpenGLWidget::updateSetting()
 void OpenGLWidget::updateState(points_positions_t pos)
 {
     frame->updatePoints(pos);
+    control_points = pos;
 }
 
 QVector4D OpenGLWidget::projectFromScreen(const float xpos, const float ypos)

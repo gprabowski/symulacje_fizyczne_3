@@ -30,15 +30,22 @@ private:
     QOpenGLFunctions_4_2_Core* f;
 
     QMatrix4x4 m_proj, m_view, m_inv_view;
+
+    QOpenGLShaderProgram program;
     GLuint u_proj, u_view, u_trans, u_inv_view, u_grid, u_color, u_shading;
 
-    QOpenGLShaderProgram program, surfacec0_program;
+    QOpenGLShaderProgram surfacec0_program;
     GLuint surfacec0_u_view, surfacec0_u_proj, surfacec0_u_segments_in, surfacec0_u_segments_out, surfacec0_u_inv_view;
+
+    QOpenGLShaderProgram model_program;
+    GLuint model_u_proj, model_u_view, model_u_inv_view, model_u_points;
 
     Camera camera;
     std::unique_ptr<Object> grid;
     std::unique_ptr<Frame> frame;
     std::unique_ptr<Object> bounding_box;
+    std::unique_ptr<Object> model;
+    points_positions_t control_points;
 
     void initializeGL() override;
     void resizeGL(int w, int h) override;
