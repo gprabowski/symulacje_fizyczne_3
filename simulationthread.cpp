@@ -5,6 +5,7 @@
 #include <iostream>
 #include <type_traits>
 #include <cmath>
+#include "common.h"
 
 using perm = std::array<int, 4>;
 const float sq2 = std::sqrt(2);
@@ -99,6 +100,53 @@ void SimulationThread::update() noexcept
                 // i potem policzyć drugiej na nowych danych)
 
                 ret[i][j][k] = curr_pos + dt * current_velocities[i][j][k];
+
+                // ODBICIA
+                auto& new_pos = ret[i][j][k];
+                while(!(std::max(std::max(abs(new_pos.x()), abs(new_pos.y())), abs(new_pos.z())) <= (kBoundingBoxEdge / 2.0f))) {
+
+
+                    if(abs(new_pos.x()) > (kBoundingBoxEdge / 2.0f)) {
+                        new_pos[0] -=
+                            new_pos.x() >= 0
+                                ? 2 * (new_pos.x() - kBoundingBoxEdge / 2.0f)
+                                : 2 * (new_pos.x() + kBoundingBoxEdge / 2.0f);
+                        if constexpr(first_collision_mode) {
+                            curr_vel[0] = settings.u * -curr_vel[0];
+                        } else {
+                            curr_vel[0] = -curr_vel[0];
+                            curr_vel *= settings.u;
+                        }
+                    }
+
+                    if(abs(new_pos.y()) > (kBoundingBoxEdge / 2.0f)) {
+                        new_pos[1] -=
+                            new_pos.y() >= 0
+                                ? 2 * (new_pos.y() - kBoundingBoxEdge / 2.0f)
+                                : 2 * (new_pos.y() + kBoundingBoxEdge / 2.0f);
+
+                        if constexpr(first_collision_mode) {
+                            curr_vel[1] = settings.u * -curr_vel[1];
+                        } else {
+                            curr_vel[1] = -curr_vel[1];
+                            curr_vel *= settings.u;
+                        }
+                    }
+
+                    if(abs(new_pos.z()) > (kBoundingBoxEdge / 2.0f)) {
+                        new_pos[2] -=
+                            new_pos.z() >= 0
+                                ? 2 * (new_pos.z() - kBoundingBoxEdge / 2.0f)
+                                : 2 * (new_pos.z() + kBoundingBoxEdge / 2.0f);
+
+                        if constexpr(first_collision_mode) {
+                            curr_vel[2] = settings.u * -curr_vel[2];
+                        } else {
+                            curr_vel[2] = -curr_vel[2];
+                            curr_vel *= settings.u;
+                        }
+                    }
+                }
 
 
                 auto one_time_term = -settings.k * curr_vel;

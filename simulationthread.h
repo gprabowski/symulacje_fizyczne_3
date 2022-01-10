@@ -50,6 +50,9 @@ struct SimulationSettings
 
     // 13. l0
     float l0 { 1.0f };
+
+    // u
+    float u { 1.0f };
 };
 
 class SimulationThread : public QThread

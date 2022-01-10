@@ -64,6 +64,9 @@ public:
         QObject::connect(ui->dtSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), [&](const int v)
             { w->simulation_settings.dt_ms = v; });
 
+        QObject::connect(ui->uDoubleSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](const double v)
+            { w->simulation_settings.u = v;	});
+
         // reset and apply buttons
         QObject::connect(ui->applyButton, QOverload<bool>::of(&QPushButton::clicked), [&](const bool)
             { w->updateSetting(); });
